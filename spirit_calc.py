@@ -8,6 +8,15 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # Seiten-Layout einstellen
 st.set_page_config(page_title="Spirit Calculator", layout="wide")
 
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 st.title("Spirit Calculator")
 
 # Eingabefeld für den Link
