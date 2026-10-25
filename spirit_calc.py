@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import urllib.error
 import ssl
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 st.set_page_config(page_title="Spirit Calculator", layout="wide")
@@ -21,29 +22,30 @@ st.title("Spirit Calculator")
 sheet_url = st.text_input("Google Sheets Link:", placeholder="enter Link")
 
 if sheet_url:
-    sheet_id = sheet_id_match.group(1)
-        
-    if gid_match:
-        gid = gid_match.group(1)
-        csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-    else:
-        csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    sheet_url = sheet_url.strip()
+    
+    sheet_id_match = re.search(r"/d/([a-zA-Z0-9-_]+)", sheet_url)
+    gid_match = re.search(r"gid=([0-9]+)", sheet_url)
 
     if not sheet_id_match:
-        st.error("couldn't find sheet id.")
+        st.error("Couldn't find sheet id. Please check the link.")
     else:
         sheet_id = sheet_id_match.group(1)
-        gid = gid_match.group(1) if gid_match else "0" 
+        
+        # 2. URL zusammenbauen (Handy-sicher: gid nur anhängen, wenn vorhanden)
+        if gid_match:
+            gid = gid_match.group(1)
+            csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+        else:
+            csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
 
-        csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-
+        # 3. Daten herunterladen und berechnen
         try:
             with st.spinner("Calculating..."):
                 spirit_scores_df = pd.read_csv(csv_export_url)
 
                 spirit_scores_df = spirit_scores_df.iloc[:, :9]
                 
-
                 spirit_scores_df.columns = ["Zeitstempel", "Your Team", "Your Opponent", "Rules Knowledge and Use", "Fouls and Body Contact", "Positive Attitute and Self-Control", "Fair-Mindedness", "Communication", "Comments"]
                 spirit_scores_df = spirit_scores_df.drop("Zeitstempel", axis=1)
 
@@ -75,10 +77,10 @@ if sheet_url:
 
         except urllib.error.HTTPError as e:
             if e.code in [401, 403]:
-                st.error("Google Sheet is private")
+                st.error("Google Sheet is private. Please change it to 'Anyone with the link'.")
             elif e.code == 404:
-                st.error("Link not correct")
+                st.error("Link not correct.")
             else:
                 st.error(f"HTTP Fehler: {e}")
         except Exception as e:
-            st.error(f"Error: Are to column names correct?")
+            st.error(f"Error: Are the column names correct? Details: {e}")
