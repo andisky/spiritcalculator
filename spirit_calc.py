@@ -23,11 +23,11 @@ sheet_url = st.text_input("Google Sheets Link:", placeholder="enter Link")
 if sheet_url:
     sheet_id = sheet_id_match.group(1)
         
-        if gid_match:
-            gid = gid_match.group(1)
-            csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-        else:
-            csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    if gid_match:
+        gid = gid_match.group(1)
+        csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+    else:
+        csv_export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
 
     if not sheet_id_match:
         st.error("couldn't find sheet id.")
